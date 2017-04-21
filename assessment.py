@@ -77,68 +77,89 @@ class Question(object):
         return '({} {})'.format(self.question, self.correct_answer)
 
     def ask_and_evaluate(self):
+        """Prompt question to console and evaulate user answer"""
+
         user_anwer = raw_input(self.question)
-        if user_anwer == self.correct_answer:
-            return True
-        else:
-            return False
+        return user_anwer == self.correct_answer
 
 
 class Exam(object):
-    questions = []
 
     def __init__(self, name):
         self.name = name
+        self.question_list = []
 
     def __repr__(self):
         return '(Exam {})'.format(self.name)
 
     def add_question(self, question, correct_answer):
-        self.questions.append(question)
-        self.questions.append(correct_answer)
+        """Create question instance"""
+
+        self.new_question = Question(question, correct_answer)
+        self.question_list.append(self.new_question)
 
     def administer(self):
+        """Administer exam's questions and returns user's score"""
         correct_counter = 0
-        for i in range(0, len(self.questions), 2):
-            user_anwer = raw_input(self.questions[i])
-            if user_anwer == self.questions[i + 1]:
+        for question in self.question_list:
+            if Question.ask_and_evaluate(question) == True:
                 correct_counter += 1
-        return (float(correct_counter) / (len(self.questions) / 2)) * 100       
+        return (float(correct_counter) / (len(self.question_list) / 2)) * 100       
 
-class StudentExam(Exam):
-    student_score = None
+class StudentExam(object):
 
     def __init__(self, student, exam):
         self.student = student
         self.exam = exam
+        self.student_score = None
 
     def __repr__(self):
         return '(StudentExam {})'.format(self.name)
 
     def take_test(self):
-        self.student_score = self.administer()
+        """Administer exam and assign score"""
+        self.student_score = self.exam.administer()
         print "Your score is {}".format(self.student_score)
 
-# this is an outline/general idea of how I would set up the Quiz class,
-# inheriting from the Exam class and returning 1 or 0 based on the scores.
-# Right now I am receiving an error that 'return' is outside the function,
-# unfortunately I do not have time (before 9pm) to debug.
 class Quiz(Exam):
-    student_score = None
-
-    def __init__(self, student):
-        self.student = student
+    
+    def __init__(self):
+      self.student_score = None
 
     def __repr__(self):
-        return '(Quiz {})'.format(self.name)
+      return '(Quiz {})'.format(self.name)
+    
+    def administer(self):
+        """Administer exam questions and return 1 or 0"""
+        correct_counter = 0
+        for question in self.question_list:
+            if Question.ask_and_evaluate(question) == True:
+                correct_counter += 1
+        if correct_counter / len(question_list) >= .5:
+            return 1
+        else:
+            return 0
+            
+class StudentQuiz(StudentExam):
 
-    self.take_test()
-    if self.student_score >= 50:
-        return 1
-    else:
-        return 0
+    def __init__(quiz):
+        self.quiz = quiz
+
+    def __repr__(self):
+        return '(StudentQuiz {})'.format(self.name)
+
+    def take_test(self):
+        """Administer exam and assign score"""
+        self.student_score = self.quiz.administer()
+        if self.student_score == 1:
+            print "You passed!"
+        else:
+            print "You failed."
+
 
 def example(exam_name, first_name, last_name, student_address):
+    """Create exam and administer to student"""
+
     exam_name = Exam(exam_name)
     exam_name.add_question("What is the color of the sky? ", "blue")
     exam_name.add_question("How many days are in a year? ", 365)
@@ -149,8 +170,8 @@ def example(exam_name, first_name, last_name, student_address):
     student_exam = StudentExam(student_name, exam_name)
 
     student_exam.take_test()
+    
 
-example("midterm", "katy", "douglass", "1335 bay st")
 
 
 
